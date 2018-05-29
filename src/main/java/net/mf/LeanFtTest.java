@@ -1,19 +1,21 @@
 package net.mf;
 
+import com.hp.lft.sdk.GeneralLeanFtException;
+import com.hp.lft.sdk.ReplayObjectNotFoundException;
+import com.hp.lft.sdk.mobile.DeviceDescription;
+import com.mf.LabDevice;
+import com.mf.utils.Logging;
+import com.mf.utils.Logging.LOG_LEVEL;
 import org.junit.*;
-import com.hp.lft.sdk.*;
-import com.hp.lft.sdk.mobile.*;
-import com.hp.lft.verifications.*;
-
-import unittesting.*;
+import unittesting.UnitTestClassBase;
 
 public class LeanFtTest extends UnitTestClassBase {
 
-    private boolean noProblem;
-    private String tags[] = {"flynn","forrester","remote"};
-    private Device device;
+    private LabDevice.LabType labType = LabDevice.LabType.SRF;  // Using Mobile Center for devices instead of SRF
+    private LabDevice labDevice = new LabDevice();
     private static AppModelAOS_iOS appModel;
-    private MCUtils utils = new MCUtils();
+
+    Logging logging = new Logging();
 
     public LeanFtTest() {
         //Change this constructor to private if you supply your own public constructor
@@ -32,47 +34,69 @@ public class LeanFtTest extends UnitTestClassBase {
 
     @Before
     public void setUp() throws Exception {
-        utils.logMessages("Enter setUp() method ", LOG_LEVEL.INFO );
-        utils.INSTALL_APP = true;
-        utils.UNINSTALL_APP = false;
-        utils.HIGHLIGHT =true;
-        //utils.APP_IDENTIFIER = "com.Advantage.iShopping";
-        utils.APP_IDENTIFIER = "com.mf.iShopping";
-        utils.APP_VERSION = "1.1.4";
-        utils.IS_PACKAGED = true;
-        noProblem = true;
+        logging.logMessages("Enter setUp() method ", LOG_LEVEL.INFO);
+
+        getLabType();
+
+        labDevice.setInstallApp(true); // install the app at the start of the test true or false
+        labDevice.setUninstallApp(false); // uninstall app at end of test true or false
+        labDevice.setHighlight(true); // highlight the objects when working with them true or false
+        labDevice.setPackaged(true); // is a packaged app true or false
+        labDevice.setAppIdentifier("com.mf.iShopping");
+        labDevice.setAppVersion("1.1.4");
+//        labDevice.setAppIdentifier("com.Advantage.iShopping");
+//        labDevice.setAppVersion("1.1.3");
+
         try {
             DeviceDescription deviceDescription = new DeviceDescription();
+
             deviceDescription.setOsType("IOS");
             deviceDescription.setOsVersion(">=9.0.0");
             deviceDescription.setModel("iPhone 5s (GSM)");
-            deviceDescription.set("testName", "Mobile AOS");
-            deviceDescription.set("tags", tags);
-            utils.lockDevice(deviceDescription);
-            //utils.lockDeviceById("8a05bbf719c5a6840177ad62b88674ee53893590");
-            if (utils.device != null) {
-                appModel = new AppModelAOS_iOS(utils.device);
-                utils.setApp();
 
-                utils.logMessages ("Allocated device: \"" + utils.device.getName() + "\" (" + utils.device.getId() + "), Model :"
-                        + utils.device.getModel() + ", OS: " + utils.device.getOSType() + " version: " + utils.device.getOSVersion()
-                        + ", manufacturer: " + utils.device.getManufacturer() + ". App in use: \"" + utils.app.getName()
-                        + "\" v" + utils.app.getVersion(), LOG_LEVEL.INFO);
+            labDevice.lockDevice(deviceDescription, labType);
+            //labDevice.lockDeviceById("e11bff56cec8edbb132e602b2ad9e7a9babeb178", labType);
 
-                if (utils.INSTALL_APP) {
-                    utils.logMessages ("Installing app: " + utils.app.getName(), LOG_LEVEL.INFO);
-                    utils.app.install();
+            if (labDevice.getDevice() != null) {
+                appModel = new AppModelAOS_iOS(labDevice.getDevice());
+                labDevice.setApp();
+
+                logging.logMessages ("Allocated device: \"" + labDevice.getDevice().getName() + "\" (" + labDevice.getDevice().getId() + "), Model :"
+                        + labDevice.getDevice().getModel() + ", OS: " + labDevice.getDevice().getOSType() + ", version: " + labDevice.getDevice().getOSVersion()
+                        + ", manufacturer: " + labDevice.getDevice().getManufacturer() + ". App in use: \"" + labDevice.getApp().getName()
+                        + "\" v" + labDevice.getApp().getVersion(), LOG_LEVEL.INFO);
+                if (labDevice.isInstallApp()) {
+                    logging.logMessages ("Installing app: " + labDevice.getApp().getName(), LOG_LEVEL.INFO);
+                    labDevice.getApp().install();
                 } else {
-                    utils.logMessages ("Restarting app: " + utils.app.getName(), LOG_LEVEL.INFO);
-                    utils.app.restart();
+                    logging.logMessages ("Restarting app: " + labDevice.getApp().getName(), LOG_LEVEL.INFO);
+                    labDevice.getApp().restart();
                 }
             } else {
-                utils.logMessages ("Device couldn't be allocated, exiting script", LOG_LEVEL.ERROR);
-                noProblem = false;
+                logging.logMessages ("Device couldn't be allocated, exiting script", LOG_LEVEL.ERROR);
             }
         } catch (Exception ex) {
-            utils.logMessages ("Exception in setup(): " + ex.getMessage(), LOG_LEVEL.ERROR);
-            noProblem = false;
+            logging.logMessages ("Exception in setup(): " + ex.getMessage(), LOG_LEVEL.ERROR);
+        }
+    }
+
+    private void getLabType (){
+        if (System.getProperty("lab") != null){
+            switch (System.getProperty("lab")){
+                case "MC":
+                    this.labType = LabDevice.LabType.MC;
+                    break;
+                case "SRF":
+                    this.labType = LabDevice.LabType.SRF;
+                    break;
+                default:
+                    this.labType = LabDevice.LabType.UNKNOWN;
+                    if (labType == LabDevice.LabType.UNKNOWN){
+                        logging.logMessages("Unknown mobile device lab.  Passed in: "+System.getProperty("lab"), LOG_LEVEL.ERROR);
+                        Assert.fail();
+                    }
+                    break;
+            }
         }
     }
 
@@ -82,111 +106,117 @@ public class LeanFtTest extends UnitTestClassBase {
 
     @Test
     public void test() throws GeneralLeanFtException, InterruptedException {
-        if (!noProblem) {
+        if (labDevice.getDevice() == null) {
             Assert.fail();
             return;
         }
 
         try {
-            utils.logMessages ("Tap 'Open Menu'", LOG_LEVEL.INFO);
-            if (utils.HIGHLIGHT)
+            logging.logMessages("Clear Allow message if it appears",LOG_LEVEL.INFO);
+
+            logging.logMessages ("Tap 'Open Menu'", LOG_LEVEL.INFO);
+            if (labDevice.isHighlight())
                 appModel.AdvantageShoppingApplication().MenuButton().highlight();
             appModel.AdvantageShoppingApplication().MenuButton().tap();
 
-            utils.logMessages ("Check if the user signed in", LOG_LEVEL.INFO);
+            logging.logMessages ("Check if the user signed in", LOG_LEVEL.INFO);
             if (appModel.AdvantageShoppingApplication().SIGNOUTLabel().exists(5)) {
                 signOut();
-                utils.windowSync(2000);
-                utils.logMessages ("Tap 'Open Menu (after sign-out)'", LOG_LEVEL.INFO);
+                deviceSync(2000);
+                logging.logMessages ("Tap 'Open Menu (after sign-out)'", LOG_LEVEL.INFO);
                 appModel.AdvantageShoppingApplication().MenuButton().tap();
-                utils.windowSync(2000);
+                deviceSync(2000);
             }
 
-            utils.logMessages ("Tap login label", LOG_LEVEL.INFO);
-            if (utils.HIGHLIGHT)
+            logging.logMessages ("Tap login label", LOG_LEVEL.INFO);
+            if (labDevice.isHighlight())
                 appModel.AdvantageShoppingApplication().LOGINLabel().highlight();
             appModel.AdvantageShoppingApplication().LOGINLabel().tap();
 
-            utils.logMessages ("Type name", LOG_LEVEL.INFO);
-            if (utils.HIGHLIGHT)
+            logging.logMessages ("Type name", LOG_LEVEL.INFO);
+            if (labDevice.isHighlight())
                 appModel.AdvantageShoppingApplication().USERNAMEEditField().highlight();
-            appModel.AdvantageShoppingApplication().USERNAMEEditField().setText("mercury1");
+            appModel.AdvantageShoppingApplication().USERNAMEEditField().setText("sshiff");
 
-            utils.logMessages ("Type password", LOG_LEVEL.INFO);
-            if (utils.HIGHLIGHT)
+            logging.logMessages ("Type password", LOG_LEVEL.INFO);
+            if (labDevice.isHighlight())
                 appModel.AdvantageShoppingApplication().PASSWORDEditField().highlight();
             appModel.AdvantageShoppingApplication().PASSWORDEditField().setSecure("97ededd61184a118aeb05c9627");
 
-            utils.logMessages ("Tap login button", LOG_LEVEL.INFO);
-            if (utils.HIGHLIGHT)
+            logging.logMessages ("Tap login button", LOG_LEVEL.INFO);
+            if (labDevice.isHighlight())
                 appModel.AdvantageShoppingApplication().LOGINButton().highlight();
             appModel.AdvantageShoppingApplication().LOGINButton().tap();
 
-            utils.logMessages ("Select 'laptop' category", LOG_LEVEL.INFO);
-            if (utils.HIGHLIGHT)
+            logging.logMessages ("Select 'laptop' category", LOG_LEVEL.INFO);
+            if (labDevice.isHighlight())
                 appModel.AdvantageShoppingApplication().LAPTOPSLabel().highlight();
             appModel.AdvantageShoppingApplication().LAPTOPSLabel().tap();
 
-            utils.logMessages ("Select a laptop", LOG_LEVEL.INFO);
-            if (utils.HIGHLIGHT)
+            logging.logMessages ("Select a laptop", LOG_LEVEL.INFO);
+            if (labDevice.isHighlight())
                 appModel.AdvantageShoppingApplication().SelectedLaptop4().highlight();
             appModel.AdvantageShoppingApplication().SelectedLaptop4().tap();
 
-            utils.logMessages ("Tap 'Add to Cart' button", LOG_LEVEL.INFO);
-            if (utils.HIGHLIGHT)
+            logging.logMessages ("Tap 'Add to Cart' button", LOG_LEVEL.INFO);
+            if (labDevice.isHighlight())
                 appModel.AdvantageShoppingApplication().ADDTOCARTButton().highlight();
             appModel.AdvantageShoppingApplication().ADDTOCARTButton().tap();
-            utils.windowSync(1500);
+            deviceSync(1500);
 
-            utils.logMessages ("Tap the back button", LOG_LEVEL.INFO);
-            if (utils.HIGHLIGHT)
+            logging.logMessages ("Tap the back button", LOG_LEVEL.INFO);
+            if (labDevice.isHighlight())
                 appModel.AdvantageShoppingApplication().BackButton().highlight();
             appModel.AdvantageShoppingApplication().BackButton().tap();
 
-            utils.logMessages ("Tap 'Open Menu'", LOG_LEVEL.INFO);
-            if (utils.HIGHLIGHT)
+            logging.logMessages ("Tap 'Open Menu'", LOG_LEVEL.INFO);
+            if (labDevice.isHighlight())
                 appModel.AdvantageShoppingApplication().MenuButton().highlight();
             appModel.AdvantageShoppingApplication().MenuButton().tap();
 
-            utils.logMessages ("Tap 'Open Cart'", LOG_LEVEL.INFO);
-            if (utils.HIGHLIGHT)
+            logging.logMessages ("Tap 'Open Cart'", LOG_LEVEL.INFO);
+            if (labDevice.isHighlight())
                 appModel.AdvantageShoppingApplication().OpenCart().highlight();
             appModel.AdvantageShoppingApplication().OpenCart().tap();
 
-            utils.logMessages ("Tap the checkout button", LOG_LEVEL.INFO);
-            if (utils.HIGHLIGHT)
+            logging.logMessages ("Tap the checkout button", LOG_LEVEL.INFO);
+            if (labDevice.isHighlight())
                 appModel.AdvantageShoppingApplication().CHECKOUTPAYButton().highlight();
             appModel.AdvantageShoppingApplication().CHECKOUTPAYButton().tap();
 
-            utils.logMessages ("Tap the pay now button", LOG_LEVEL.INFO);
-            if (utils.HIGHLIGHT)
+            logging.logMessages ("Tap the pay now button", LOG_LEVEL.INFO);
+            if (labDevice.isHighlight())
                 appModel.AdvantageShoppingApplication().PAYNOWButton().highlight();
             appModel.AdvantageShoppingApplication().PAYNOWButton().tap();
 
-            utils.logMessages ("Tap OK", LOG_LEVEL.INFO);
-            if (utils.HIGHLIGHT)
+            logging.logMessages ("Tap OK", LOG_LEVEL.INFO);
+            if (labDevice.isHighlight())
                 appModel.AdvantageShoppingApplication().OkButton().highlight();
             appModel.AdvantageShoppingApplication().OkButton().tap();
 
             appModel.AdvantageShoppingApplication().MenuButton().tap();
             signOut();
 
-            utils.logMessages ("********** Test completed successfully **********", LOG_LEVEL.INFO);
+            logging.logMessages ("********** Test completed successfully **********", LOG_LEVEL.INFO);
 
         } catch (ReplayObjectNotFoundException ronfex) {
-            utils.logMessages ("error code: " + ronfex.getErrorCode() + " - " + ronfex.getMessage(), LOG_LEVEL.ERROR);
+            logging.logMessages ("error code: " + ronfex.getErrorCode() + " - " + ronfex.getMessage(), LOG_LEVEL.ERROR);
             Assert.fail();
         }
     }
 
     private void signOut() throws GeneralLeanFtException {
-        if (utils.HIGHLIGHT)
+        if (labDevice.isHighlight())
             appModel.AdvantageShoppingApplication().SIGNOUTLabel().highlight();
         appModel.AdvantageShoppingApplication().SIGNOUTLabel().tap();
 
-        if (utils.HIGHLIGHT)
+        if (labDevice.isHighlight())
             appModel.AdvantageShoppingApplication().YesButton().highlight();
         appModel.AdvantageShoppingApplication().YesButton().tap();
+    }
+
+    private void deviceSync (int millisecons) throws InterruptedException {
+        Thread.sleep(millisecons);
     }
 
 }

@@ -233,5 +233,31 @@
                 </object>
             </children>
         </object>
+        <object type="Application" technology="Mobile">
+            <name>Home</name>
+            <codeName>homeApplication</codeName>
+            <description></description>
+            <identification>
+                <properties>
+                    <property name="Identifier" type="string" isRegExp="false">MC.Home</property>
+                    <property name="IsPackaged" type="boolean" isRegExp="false">false</property>
+                </properties>
+            </identification>
+            <children>
+                <object type="Button" technology="Mobile">
+                    <name>Allow</name>
+                    <codeName>allowButton</codeName>
+                    <description></description>
+                    <identification>
+                        <properties>
+                            <property name="AccessibilityId" type="string" isRegExp="false">Allow</property>
+                            <property name="ClassName" type="string" isRegExp="false">Button</property>
+                            <property name="MobileCenterIndex" type="int" isRegExp="false">1</property>
+                            <property name="Text" type="string" isRegExp="false">Allow</property>
+                        </properties>
+                    </identification>
+                </object>
+            </children>
+        </object>
     </objects>
 </applicationModel>
