@@ -11,9 +11,11 @@ import unittesting.UnitTestClassBase;
 
 public class LeanFtTest extends UnitTestClassBase {
 
-    private LabDevice.LabType labType = LabDevice.LabType.SRF;  // Using Mobile Center for devices instead of SRF
+//    private LabDevice.LabType labType = LabDevice.LabType.MC;  // Using Mobile Center for devices instead of SRF
+private LabDevice.LabType labType = LabDevice.LabType.SRF;
     private LabDevice labDevice = new LabDevice();
     private static AppModelAOS_iOS appModel;
+    private String tags[] = {"aos-ios-leanft","remote"};
 
     Logging logging = new Logging();
 
@@ -53,6 +55,8 @@ public class LeanFtTest extends UnitTestClassBase {
             deviceDescription.setOsType("IOS");
             deviceDescription.setOsVersion(">=9.0.0");
             deviceDescription.setModel("iPhone 5s (GSM)");
+            deviceDescription.set("testName", "Mobile AOS");
+            deviceDescription.set("tags", tags);
 
             labDevice.lockDevice(deviceDescription, labType);
             //labDevice.lockDeviceById("e11bff56cec8edbb132e602b2ad9e7a9babeb178", labType);
@@ -112,7 +116,7 @@ public class LeanFtTest extends UnitTestClassBase {
         }
 
         try {
-            logging.logMessages("Clear Allow message if it appears",LOG_LEVEL.INFO);
+            //logging.logMessages("Clear Allow message if it appears",LOG_LEVEL.INFO);
 
             logging.logMessages ("Tap 'Open Menu'", LOG_LEVEL.INFO);
             if (labDevice.isHighlight())
@@ -136,7 +140,7 @@ public class LeanFtTest extends UnitTestClassBase {
             logging.logMessages ("Type name", LOG_LEVEL.INFO);
             if (labDevice.isHighlight())
                 appModel.AdvantageShoppingApplication().USERNAMEEditField().highlight();
-            appModel.AdvantageShoppingApplication().USERNAMEEditField().setText("sshiff");
+            appModel.AdvantageShoppingApplication().USERNAMEEditField().setText("mercury1");
 
             logging.logMessages ("Type password", LOG_LEVEL.INFO);
             if (labDevice.isHighlight())

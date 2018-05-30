@@ -5,7 +5,7 @@
     <objects>
         <object type="Application" technology="Mobile">
             <name>Advantage Shopping</name>
-            <codeName>AdvantageShoppingApplication</codeName>
+            <codeName>AOSApp</codeName>
             <description></description>
             <identification>
                 <properties>
@@ -235,7 +235,7 @@
         </object>
         <object type="Application" technology="Mobile">
             <name>Home</name>
-            <codeName>homeApplication</codeName>
+            <codeName>Home</codeName>
             <description></description>
             <identification>
                 <properties>
