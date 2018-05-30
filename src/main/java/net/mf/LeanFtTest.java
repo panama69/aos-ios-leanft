@@ -116,89 +116,93 @@ private LabDevice.LabType labType = LabDevice.LabType.SRF;
         }
 
         try {
-            //logging.logMessages("Clear Allow message if it appears",LOG_LEVEL.INFO);
+            logging.logMessages("Clear Allow message if it appears",LOG_LEVEL.INFO);
+            if (appModel.Home().allowButton().isEnabled()){
+                appModel.Home().allowButton().tap();
+                logging.logMessages("Allow message cleared", LOG_LEVEL.INFO);
+            }
 
             logging.logMessages ("Tap 'Open Menu'", LOG_LEVEL.INFO);
             if (labDevice.isHighlight())
-                appModel.AdvantageShoppingApplication().MenuButton().highlight();
-            appModel.AdvantageShoppingApplication().MenuButton().tap();
+                appModel.AOSApp().MenuButton().highlight();
+            appModel.AOSApp().MenuButton().tap();
 
             logging.logMessages ("Check if the user signed in", LOG_LEVEL.INFO);
-            if (appModel.AdvantageShoppingApplication().SIGNOUTLabel().exists(5)) {
+            if (appModel.AOSApp().SIGNOUTLabel().exists(5)) {
                 signOut();
                 deviceSync(2000);
                 logging.logMessages ("Tap 'Open Menu (after sign-out)'", LOG_LEVEL.INFO);
-                appModel.AdvantageShoppingApplication().MenuButton().tap();
+                appModel.AOSApp().MenuButton().tap();
                 deviceSync(2000);
             }
 
             logging.logMessages ("Tap login label", LOG_LEVEL.INFO);
             if (labDevice.isHighlight())
-                appModel.AdvantageShoppingApplication().LOGINLabel().highlight();
-            appModel.AdvantageShoppingApplication().LOGINLabel().tap();
+                appModel.AOSApp().LOGINLabel().highlight();
+            appModel.AOSApp().LOGINLabel().tap();
 
             logging.logMessages ("Type name", LOG_LEVEL.INFO);
             if (labDevice.isHighlight())
-                appModel.AdvantageShoppingApplication().USERNAMEEditField().highlight();
-            appModel.AdvantageShoppingApplication().USERNAMEEditField().setText("mercury1");
+                appModel.AOSApp().USERNAMEEditField().highlight();
+            appModel.AOSApp().USERNAMEEditField().setText("mercury1");
 
             logging.logMessages ("Type password", LOG_LEVEL.INFO);
             if (labDevice.isHighlight())
-                appModel.AdvantageShoppingApplication().PASSWORDEditField().highlight();
-            appModel.AdvantageShoppingApplication().PASSWORDEditField().setSecure("97ededd61184a118aeb05c9627");
+                appModel.AOSApp().PASSWORDEditField().highlight();
+            appModel.AOSApp().PASSWORDEditField().setSecure("97ededd61184a118aeb05c9627");
 
             logging.logMessages ("Tap login button", LOG_LEVEL.INFO);
             if (labDevice.isHighlight())
-                appModel.AdvantageShoppingApplication().LOGINButton().highlight();
-            appModel.AdvantageShoppingApplication().LOGINButton().tap();
+                appModel.AOSApp().LOGINButton().highlight();
+            appModel.AOSApp().LOGINButton().tap();
 
             logging.logMessages ("Select 'laptop' category", LOG_LEVEL.INFO);
             if (labDevice.isHighlight())
-                appModel.AdvantageShoppingApplication().LAPTOPSLabel().highlight();
-            appModel.AdvantageShoppingApplication().LAPTOPSLabel().tap();
+                appModel.AOSApp().LAPTOPSLabel().highlight();
+            appModel.AOSApp().LAPTOPSLabel().tap();
 
             logging.logMessages ("Select a laptop", LOG_LEVEL.INFO);
             if (labDevice.isHighlight())
-                appModel.AdvantageShoppingApplication().SelectedLaptop4().highlight();
-            appModel.AdvantageShoppingApplication().SelectedLaptop4().tap();
+                appModel.AOSApp().SelectedLaptop4().highlight();
+            appModel.AOSApp().SelectedLaptop4().tap();
 
             logging.logMessages ("Tap 'Add to Cart' button", LOG_LEVEL.INFO);
             if (labDevice.isHighlight())
-                appModel.AdvantageShoppingApplication().ADDTOCARTButton().highlight();
-            appModel.AdvantageShoppingApplication().ADDTOCARTButton().tap();
+                appModel.AOSApp().ADDTOCARTButton().highlight();
+            appModel.AOSApp().ADDTOCARTButton().tap();
             deviceSync(1500);
 
             logging.logMessages ("Tap the back button", LOG_LEVEL.INFO);
             if (labDevice.isHighlight())
-                appModel.AdvantageShoppingApplication().BackButton().highlight();
-            appModel.AdvantageShoppingApplication().BackButton().tap();
+                appModel.AOSApp().BackButton().highlight();
+            appModel.AOSApp().BackButton().tap();
 
             logging.logMessages ("Tap 'Open Menu'", LOG_LEVEL.INFO);
             if (labDevice.isHighlight())
-                appModel.AdvantageShoppingApplication().MenuButton().highlight();
-            appModel.AdvantageShoppingApplication().MenuButton().tap();
+                appModel.AOSApp().MenuButton().highlight();
+            appModel.AOSApp().MenuButton().tap();
 
             logging.logMessages ("Tap 'Open Cart'", LOG_LEVEL.INFO);
             if (labDevice.isHighlight())
-                appModel.AdvantageShoppingApplication().OpenCart().highlight();
-            appModel.AdvantageShoppingApplication().OpenCart().tap();
+                appModel.AOSApp().OpenCart().highlight();
+            appModel.AOSApp().OpenCart().tap();
 
             logging.logMessages ("Tap the checkout button", LOG_LEVEL.INFO);
             if (labDevice.isHighlight())
-                appModel.AdvantageShoppingApplication().CHECKOUTPAYButton().highlight();
-            appModel.AdvantageShoppingApplication().CHECKOUTPAYButton().tap();
+                appModel.AOSApp().CHECKOUTPAYButton().highlight();
+            appModel.AOSApp().CHECKOUTPAYButton().tap();
 
             logging.logMessages ("Tap the pay now button", LOG_LEVEL.INFO);
             if (labDevice.isHighlight())
-                appModel.AdvantageShoppingApplication().PAYNOWButton().highlight();
-            appModel.AdvantageShoppingApplication().PAYNOWButton().tap();
+                appModel.AOSApp().PAYNOWButton().highlight();
+            appModel.AOSApp().PAYNOWButton().tap();
 
             logging.logMessages ("Tap OK", LOG_LEVEL.INFO);
             if (labDevice.isHighlight())
-                appModel.AdvantageShoppingApplication().OkButton().highlight();
-            appModel.AdvantageShoppingApplication().OkButton().tap();
+                appModel.AOSApp().OkButton().highlight();
+            appModel.AOSApp().OkButton().tap();
 
-            appModel.AdvantageShoppingApplication().MenuButton().tap();
+            appModel.AOSApp().MenuButton().tap();
             signOut();
 
             logging.logMessages ("********** Test completed successfully **********", LOG_LEVEL.INFO);
@@ -211,12 +215,12 @@ private LabDevice.LabType labType = LabDevice.LabType.SRF;
 
     private void signOut() throws GeneralLeanFtException {
         if (labDevice.isHighlight())
-            appModel.AdvantageShoppingApplication().SIGNOUTLabel().highlight();
-        appModel.AdvantageShoppingApplication().SIGNOUTLabel().tap();
+            appModel.AOSApp().SIGNOUTLabel().highlight();
+        appModel.AOSApp().SIGNOUTLabel().tap();
 
         if (labDevice.isHighlight())
-            appModel.AdvantageShoppingApplication().YesButton().highlight();
-        appModel.AdvantageShoppingApplication().YesButton().tap();
+            appModel.AOSApp().YesButton().highlight();
+        appModel.AOSApp().YesButton().tap();
     }
 
     private void deviceSync (int millisecons) throws InterruptedException {
